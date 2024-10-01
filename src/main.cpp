@@ -1,7 +1,7 @@
 #include "triangle.hpp"
 #include "octotree.hpp"
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
     #include <chrono>
