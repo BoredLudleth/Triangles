@@ -1,7 +1,7 @@
 #include "triangle.hpp"
 #include "octotree.hpp"
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
     #include <chrono>
@@ -31,7 +31,7 @@ int main() {
         input.push_back(trg);
     }
 
-    octotree<float> octo(input, 0);
+    octotree<float> octo(input, 2);
     std::deque<cell<float>> groups = octo.get_groups();
     octo.divide_full_depth();
 
@@ -43,7 +43,7 @@ int main() {
     }
 
     for (auto it = result.begin(); it != result.end(); ++it) {
-        std::cout << it->first << std::endl;
+        std::cout << it->second << std::endl;
     }
 
     #ifdef DEBUG

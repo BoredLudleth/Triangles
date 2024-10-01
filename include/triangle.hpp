@@ -146,6 +146,7 @@ bool triangle_intersection(const line<T>& l, const triangle<T>& trg) {
     point<T> h = vec_multiply(dir, e2);
     T a = scalar_multiply(e1,h);
     if (cmp(a, 0)) {
+        //случай когда линия и треугольник в одной плоскости
         line<T> f(e1, v0);
         line<T> s(e2, v0);
         line<T> t(v2 - v1, v1);
@@ -154,13 +155,13 @@ bool triangle_intersection(const line<T>& l, const triangle<T>& trg) {
         point<T> p2 = intersection(l, s);
         point<T> p3 = intersection(l, t);
 
-        if (p1.valid() && is_point_on_segment(p1, v0, v1) && is_point_on_segment(p1, orig, orig + dir))
+        if (p1.valid() && point_in_triangle(p1, trg) && is_point_on_segment(p1, orig, orig + dir))
             return true;
         
-        if (p2.valid() && is_point_on_segment(p2, v0, v2) && is_point_on_segment(p2, orig, orig + dir))
+        if (p2.valid() && point_in_triangle(p2, trg) && is_point_on_segment(p2, orig, orig + dir))
             return true;
 
-        if (p3.valid() && is_point_on_segment(p3, v1, v2) && is_point_on_segment(p3, orig, orig + dir))
+        if (p3.valid() && point_in_triangle(p3, trg) && is_point_on_segment(p3, orig, orig + dir))
             return true;
 
         return false;
@@ -183,7 +184,7 @@ bool triangle_intersection(const line<T>& l, const triangle<T>& trg) {
 
     T t = f * scalar_multiply(e2, q);
     
-    if (t > 0 && t < 1) {
+    if (t >= 0 && t <= 1) {
         // inter = orig + dir * t;
         return true;
     }
@@ -191,8 +192,31 @@ bool triangle_intersection(const line<T>& l, const triangle<T>& trg) {
 }
 
 template<typename T = float>
+point<T> get_line_vec_from_trg(const triangle<T>& trg) {
+    point<T> zero(0,0,0);
+    if (trg.valid()) {
+        return point<T>(NAN, NAN, NAN);
+    }
+
+    if (trg.get_a() - trg.get_b() != zero) {
+        return trg.get_a() - trg.get_b();
+    }
+
+    if (trg.get_c() - trg.get_b() != zero) {
+        return trg.get_c() - trg.get_b();
+    }
+
+    if (trg.get_a() - trg.get_c() != zero) {
+        return trg.get_a() - trg.get_c();
+    }
+
+    return point<T>(NAN, NAN, NAN);
+}
+
+template<typename T = float>
 bool intersection (const triangle<T>& lhs, const triangle<T>& rhs) {
-    size_t num_of_valid = lhs.valid() + rhs.valid();
+    size_t num_of_valid = lhs.valid();
+    num_of_valid += rhs.valid();
     switch(num_of_valid) {
         case 0:
             {
@@ -203,14 +227,47 @@ bool intersection (const triangle<T>& lhs, const triangle<T>& rhs) {
 
                 //two lines
                 if (!lhs.isPoint() && !rhs.isPoint()) {
-                    line<T> first(lhs.get_c() - lhs.get_a(), lhs.get_a());
-                    line<T> second(rhs.get_c() - rhs.get_a(), rhs.get_a());
+                    line<T> first(get_line_vec_from_trg(lhs), lhs.get_a());
+                    line<T> second(get_line_vec_from_trg(rhs), rhs.get_a());
 
                     point<T> inter = intersection(first, second);
 
-                    if(is_point_on_segment(inter, lhs.get_a(), lhs.get_c()) &&
-                       is_point_on_segment(inter, rhs.get_a(), rhs.get_c())) {
+                    if((is_point_on_segment(inter, lhs.get_a(), lhs.get_b()) || is_point_on_segment(inter, lhs.get_a(), lhs.get_c()) ||
+                       is_point_on_segment(inter, lhs.get_b(), lhs.get_c())) && (is_point_on_segment(inter, lhs.get_a(), lhs.get_b())||
+                       is_point_on_segment(inter, rhs.get_a(), rhs.get_c()) || is_point_on_segment(inter, rhs.get_b(), rhs.get_c()))) {
                         return true;
+                    }
+
+                    if (first == second){
+                        if(is_point_on_segment(lhs.get_a(), rhs.get_a(), rhs.get_b()) || is_point_on_segment(lhs.get_a(), rhs.get_b(), rhs.get_c()) ||
+                           is_point_on_segment(lhs.get_a(), rhs.get_a(), rhs.get_c())) {
+                        return true;
+                        }
+
+                        if(is_point_on_segment(lhs.get_b(), rhs.get_a(), rhs.get_b()) || is_point_on_segment(lhs.get_b(), rhs.get_b(), rhs.get_c()) ||
+                           is_point_on_segment(lhs.get_b(), rhs.get_a(), rhs.get_c())) {
+                        return true;
+                        }
+
+                        if(is_point_on_segment(lhs.get_c(), rhs.get_a(), rhs.get_b()) || is_point_on_segment(lhs.get_c(), rhs.get_b(), rhs.get_c()) ||
+                           is_point_on_segment(lhs.get_c(), rhs.get_a(), rhs.get_c())) {
+                        return true;
+                        }
+
+                        if(is_point_on_segment(rhs.get_a(), lhs.get_a(), lhs.get_b()) || is_point_on_segment(rhs.get_a(), lhs.get_b(), lhs.get_c()) ||
+                           is_point_on_segment(rhs.get_a(), lhs.get_a(), lhs.get_c())) {
+                        return true;
+                        }
+
+                        if(is_point_on_segment(rhs.get_b(), lhs.get_a(), lhs.get_b()) || is_point_on_segment(rhs.get_b(), lhs.get_b(), lhs.get_c()) ||
+                           is_point_on_segment(rhs.get_b(), lhs.get_a(), lhs.get_c())) {
+                        return true;
+                        }
+
+                        if(is_point_on_segment(rhs.get_c(), lhs.get_a(), lhs.get_b()) || is_point_on_segment(rhs.get_c(), lhs.get_b(), lhs.get_c()) ||
+                           is_point_on_segment(rhs.get_c(), lhs.get_a(), lhs.get_c())) {
+                        return true;
+                        }
                     }
                 }
 
@@ -302,20 +359,39 @@ bool is_point_on_segment(const point<T>& p, const point<T>& a, const point<T>& b
 
 template<typename T = float>
 bool point_in_triangle(const point<T>& p, const triangle<T>& trg) {
-    point<T> v0 = trg.get_c() - trg.get_a();
-    point<T> v1 = trg.get_b() - trg.get_a();
-    point<T> v2 = p - trg.get_a();
+    point<T> v0 = trg.get_a() - trg.get_b();
+    point<T> v1 = trg.get_c() - trg.get_a();
+    point<T> v2 = trg.get_b() - trg.get_c();
 
-    T d00 = scalar_multiply(v0, v0);
-    T d01 = scalar_multiply(v0, v1);
-    T d11 = scalar_multiply(v1, v1);
-    T d20 = scalar_multiply(v2, v0);
-    T d21 = scalar_multiply(v2, v1);
+    point<T> p_a = vec_multiply(v0, p - trg.get_b()).normalize();
+    point<T> p_b = vec_multiply(v1, p - trg.get_a()).normalize();
+    point<T> p_c = vec_multiply(v2, p - trg.get_c()).normalize();
 
-    T denom = d00 * d11 - d01 * d01;
-    T v = (d11 * d20 - d01 * d21) / denom;
-    T w = (d00 * d21 - d01 * d20) / denom;
-    T u = 1.0 - v - w;
+    point<T> zero(0,0,0);
 
-    return (u >= 0) && (v >= 0) && (w >= 0);
+    if ((p_a == zero && p_b == zero) || (p_a == zero && p_c == zero) || (p_b == zero && p_c == zero)) {
+        return true;
+    }
+
+    if (p_a == zero) {
+        if (p_b == p_c)
+            return true;
+        return false;
+    }
+
+    if (p_b == zero) {
+        if (p_a == p_c)
+            return true;
+        return false;
+    }
+
+    if (p_c == zero) {
+        if (p_a == p_b)
+            return true;
+        return false; 
+    }
+
+    if (p_a == p_b && p_b == p_c)
+        return true;
+    return false;
 }

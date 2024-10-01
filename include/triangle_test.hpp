@@ -157,6 +157,19 @@ TEST(TestTriangle, TrgTest) {
     triangle<float> trg11 (0.1,0.1,-1,0.1,0.1,1,-10,0,0);
     EXPECT_EQ(intersection(trg10, trg11), 1);
 
+    triangle<float> trg12 (1,1,0,3,1,0,1,3,0);
+    triangle<float> trg13 (1,1,0,1,2,3,5,4,8);
+    EXPECT_EQ(intersection(trg12, trg13), 1);
+
+    triangle<float> trg14 (1,0,0,0,1,0,0,0,0);
+    triangle<float> trg15 (0.5,0,0,0,-10,0,-10,-10,-10);
+    EXPECT_EQ(intersection(trg14, trg15), 1);
+
+    triangle<float> trg16 (1,0,0,0,1,0,0,0,1);
+    triangle<float> trg17 (9,9,9,9,9,9,9,9,9);
+    EXPECT_EQ(intersection(trg16, trg17), 0);
+
+
     // 0 0 0 1 0 0 0 1 0
     // 0.1 0.1 5 0.3 0.3 5 0.2 0.2 -5
 }

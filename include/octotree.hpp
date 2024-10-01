@@ -248,6 +248,10 @@ void group_intersections(std::list<std::list<triangle<float>>::iterator>& cur_gr
 
         for (auto second = it; second != cur_group.end(); ++second) {
             if(intersection(**first, **second)) {
+                // std::cout << (*first)->num << " " << (*second)->num << " "<< intersection(**first, **second) << std::endl;
+                // (*first)->print();
+                // (*second)->print();
+                
                 result[(*first)->num] = (*first)->num;
                 result[(*second)->num] = (*second)->num;
             }

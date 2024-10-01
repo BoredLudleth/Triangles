@@ -63,6 +63,14 @@ public:
         
         return *this;
     }
+
+    point<T> normalize() {
+        if (cmp(length(), 0)) {
+            return *this;
+        }
+
+        return (*this) * (1 / sqrt(length()));
+    }
 };
 
 template<typename T = float>
