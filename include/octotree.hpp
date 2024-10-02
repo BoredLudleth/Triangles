@@ -244,6 +244,7 @@ template <typename T = float>
 void group_intersections(std::list<std::list<triangle<float>>::iterator>& cur_group, std::map<size_t, size_t>& result) {
     for (auto first = cur_group.begin(); first != cur_group.end(); ++first) {
         auto it = first;
+
         it++;
 
         for (auto second = it; second != cur_group.end(); ++second) {

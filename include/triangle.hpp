@@ -149,15 +149,18 @@ bool triangle_intersection(const line<T>& l, const triangle<T>& trg) {
         //случай когда линия и треугольник в одной плоскости
         line<T> f(e1, v0);
         line<T> s(e2, v0);
-        line<T> t(v2 - v1, v1);
+        line<T> t(e2 - e1, v1);
 
         point<T> p1 = intersection(l, f);
         point<T> p2 = intersection(l, s);
         point<T> p3 = intersection(l, t);
 
+        if (point_in_triangle(orig, trg) || point_in_triangle(orig + dir, trg))
+            return true;
+
         if (p1.valid() && point_in_triangle(p1, trg) && is_point_on_segment(p1, orig, orig + dir))
             return true;
-        
+
         if (p2.valid() && point_in_triangle(p2, trg) && is_point_on_segment(p2, orig, orig + dir))
             return true;
 
