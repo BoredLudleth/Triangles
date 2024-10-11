@@ -29,6 +29,37 @@ public:
         std::cout << "point:";
         p.print();
     }
+
+    point<T> intersection (const line<T>& rhs) const {
+        point<T> vec2(rhs.get_vec());
+        point<T> point2(rhs.get_point());
+
+        float s = 0;
+
+        if (!cmp(vec2.get_x() * v.get_y(), vec2.get_y() * v.get_x())) {
+            s = ((p.get_x() - point2.get_x()) * v.get_y() + (point2.get_y() - p.get_y()) * v.get_x())/(vec2.get_x() * v.get_y() - vec2.get_y() * v.get_x());
+
+            point<T> answer = point2 + vec2 * s;
+            return answer;
+        }
+
+        if (!cmp(vec2.get_x() * v.get_z(), vec2.get_z() * v.get_x())) {
+            s = ((p.get_x() - point2.get_x()) * v.get_z() + (point2.get_z() - p.get_z()) * v.get_x())/(vec2.get_x() * v.get_z() - vec2.get_z() * v.get_x());
+
+            point<T> answer = point2 + vec2 * s;
+            return answer;
+        }
+
+        if (!cmp(vec2.get_z() * v.get_y(), vec2.get_y() * v.get_z())) {
+            s = ((p.get_z() - point2.get_z()) * v.get_y() + (point2.get_y() - p.get_y()) * v.get_z())/(vec2.get_z() * v.get_y() - vec2.get_y() * v.get_z());
+
+            point<T> answer = point2 + vec2 * s;;
+            return answer;
+        }
+
+        point<T> answer(NAN, NAN, NAN);
+        return answer;
+    }
 };
 
 template<typename T = float>
@@ -113,39 +144,4 @@ bool operator==(const line<T>& lhs, const line<T>& rhs) {
     }
 
     return true;
-}
-
-template<typename T>
-point<T> intersection (const line<T>& lhs, const line<T>& rhs) {
-    point<T> vec1(lhs.get_vec());
-    point<T> point1(lhs.get_point());
-
-    point<T> vec2(rhs.get_vec());
-    point<T> point2(rhs.get_point());
-
-    float s = 0;
-
-    if (!cmp(vec2.get_x() * vec1.get_y(), vec2.get_y() * vec1.get_x())) {
-        s = ((point1.get_x() - point2.get_x()) * vec1.get_y() + (point2.get_y() - point1.get_y()) * vec1.get_x())/(vec2.get_x() * vec1.get_y() - vec2.get_y() * vec1.get_x());
-
-        point<T> answer = point2 + vec2 * s;
-        return answer;
-    }
-
-    if (!cmp(vec2.get_x() * vec1.get_z(), vec2.get_z() * vec1.get_x())) {
-        s = ((point1.get_x() - point2.get_x()) * vec1.get_z() + (point2.get_z() - point1.get_z()) * vec1.get_x())/(vec2.get_x() * vec1.get_z() - vec2.get_z() * vec1.get_x());
-
-        point<T> answer = point2 + vec2 * s;
-        return answer;
-    }
-
-    if (!cmp(vec2.get_z() * vec1.get_y(), vec2.get_y() * vec1.get_z())) {
-        s = ((point1.get_z() - point2.get_z()) * vec1.get_y() + (point2.get_y() - point1.get_y()) * vec1.get_z())/(vec2.get_z() * vec1.get_y() - vec2.get_y() * vec1.get_z());
-
-        point<T> answer = point2 + vec2 * s;;
-        return answer;
-    }
-
-    point<T> answer(NAN, NAN, NAN);
-    return answer;
 }

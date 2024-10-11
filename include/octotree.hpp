@@ -73,7 +73,28 @@ public:
 
     void print() const {
         for (const auto& it : incell) {
-            it->print();
+            std::cout << it->num << " ";
+        }
+
+        std::cout << std::endl;
+    }
+
+    void group_intersections(std::map<size_t, size_t>& result) {
+        for (auto first = incell.begin(); first != incell.end(); ++first) {
+            auto it = first;
+
+            it++;
+
+            for (auto second = it; second != incell.end(); ++second) {
+                if((*first)->intersection(**second)) {
+                    // std::cout << (*first)->num << " " << (*second)->num << " "<< intersection(**first, **second) << std::endl;
+                    // (*first)->print();
+                    // (*second)->print();
+                    
+                    result[(*first)->num] = (*first)->num;
+                    result[(*second)->num] = (*second)->num;
+                }
+            }
         }
     }
 };
@@ -128,17 +149,21 @@ public:
                    }
             }
 
-            if (!plus.empty()) {
-                groups.push_back(cell<T>(plus));
-                num_of_cells++;
-            }
-            if (!minus.empty()) {
-                groups.push_back(cell<T>(minus));
-                num_of_cells++;
+            if (plus.size() + minus.size() < front_groups.get_incell().size() * 2) {
+                if (!plus.empty()) {
+                    groups.push_back(cell<T>(plus));
+                    num_of_cells++;
+                }
+                
+                if (!minus.empty()) {
+                    groups.push_back(cell<T>(minus));
+                    num_of_cells++;
+                }
+
+                groups.pop_front();
+                num_of_cells--;
             }
 
-            groups.pop_front();
-            num_of_cells--;
 
             plus.clear();
             minus.clear();
@@ -169,10 +194,12 @@ public:
                    }
             }
 
+        if (plus.size() + minus.size() < front_groups.get_incell().size() * 2) {
             if (!plus.empty()) {
                 groups.push_back(cell<T>(plus));
                 num_of_cells++;
             }
+
             if (!minus.empty()) {
                 groups.push_back(cell<T>(minus));
                 num_of_cells++;
@@ -180,6 +207,8 @@ public:
 
             groups.pop_front();
             num_of_cells--;
+        }
+
 
             plus.clear();
             minus.clear();
@@ -210,16 +239,22 @@ public:
                    }
             }
 
+        if (plus.size() + minus.size() < front_groups.get_incell().size() * 2) {
             if (!plus.empty()) {
-                groups.push_back(cell<T>(plus));
+                cell<T>pl(plus);
+                groups.push_back(pl);
                 num_of_cells++;
             }
+
             if (!minus.empty()) {
-                groups.push_back(cell<T>(minus));
+                cell<T>mn(minus);
+                groups.push_back(mn);
                 num_of_cells++;
             }
+
             groups.pop_front();
             num_of_cells--;
+        }
 
             plus.clear();
             minus.clear();
@@ -237,25 +272,20 @@ public:
             divide_on_eight();
         }
     }
-
 };
 
-template <typename T = float>
-void group_intersections(std::list<std::list<triangle<float>>::iterator>& cur_group, std::map<size_t, size_t>& result) {
-    for (auto first = cur_group.begin(); first != cur_group.end(); ++first) {
-        auto it = first;
-
-        it++;
-
-        for (auto second = it; second != cur_group.end(); ++second) {
-            if(intersection(**first, **second)) {
-                // std::cout << (*first)->num << " " << (*second)->num << " "<< intersection(**first, **second) << std::endl;
-                // (*first)->print();
-                // (*second)->print();
-                
-                result[(*first)->num] = (*first)->num;
-                result[(*second)->num] = (*second)->num;
-            }
-        }
+size_t count_depth(size_t n) {
+    if (n < 1000) {
+        return 0;
     }
+
+    if (n < 10000) {
+        return 1;
+    }
+
+    if (n < 100000) {
+        return 2;
+    }
+
+    return 3;
 }

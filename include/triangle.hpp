@@ -115,6 +115,257 @@ public:
             return true;
         return false;
     }
+
+    bool point_in_triangle(const point<T>& p) const {
+        point<T> v0 = a - b;
+        point<T> v1 = c - a;
+        point<T> v2 = b - c;
+
+        point<T> p_a = vec_multiply(v0, p - b).normalize();
+        point<T> p_b = vec_multiply(v1, p - a).normalize();
+        point<T> p_c = vec_multiply(v2, p - c).normalize();
+
+        point<T> zero(0,0,0);
+
+        if ((p_a == zero && p_b == zero) || (p_a == zero && p_c == zero) || (p_b == zero && p_c == zero)) {
+            return true;
+        }
+
+        if (p_a == zero) {
+            if (p_b == p_c)
+                return true;
+            return false;
+        }
+
+        if (p_b == zero) {
+            if (p_a == p_c)
+                return true;
+            return false;
+        }
+
+        if (p_c == zero) {
+            if (p_a == p_b)
+                return true;
+            return false; 
+        }
+
+        if (p_a == p_b && p_b == p_c)
+            return true;
+        return false;
+    }
+
+
+    point<T> get_line_vec_from_trg() const {
+        point<T> zero(0,0,0);
+        if (valid()) {
+            return point<T>(NAN, NAN, NAN);
+        }
+
+        if (a - b != zero) {
+            return a - b;
+        }
+
+        if (c - b != zero) {
+            return c - b;
+        }
+
+        if (a - c != zero) {
+            return a - c;
+        }
+
+        return point<T>(NAN, NAN, NAN);
+    }
+
+    bool triangle_intersection(const line<T>& l) const {
+        point<T> orig = l.get_point();
+        point<T> dir = l.get_vec();
+
+        point<T> e1 = b - a;
+        point<T> e2 = c - a;
+        point<T> h = vec_multiply(dir, e2);
+        T is_on_parallel_plane = scalar_multiply(e1,h);
+        if (cmp(is_on_parallel_plane, 0)) {
+            //случай когда линия и треугольник в одной плоскости
+            line<T> f(e1, a);
+            line<T> s(e2, a);
+            line<T> t(e2 - e1, b);
+
+            point<T> p1 = l.intersection(f);
+            point<T> p2 = l.intersection(s);
+            point<T> p3 = l.intersection(t);
+
+            if (point_in_triangle(orig) || point_in_triangle(orig + dir))
+                return true;
+
+            if (p1.valid() && point_in_triangle(p1) && is_point_on_segment(p1, orig, orig + dir))
+                return true;
+
+            if (p2.valid() && point_in_triangle(p2) && is_point_on_segment(p2, orig, orig + dir))
+                return true;
+
+            if (p3.valid() && point_in_triangle(p3) && is_point_on_segment(p3, orig, orig + dir))
+                return true;
+
+            return false;
+        }
+
+        T f = 1.0 / is_on_parallel_plane;
+        point<T> s = orig - a;
+        T u = f * scalar_multiply(s, h);
+
+        if (u < 0.0 || u > 1.0) {
+            return false;
+        }
+
+        point<T> q = vec_multiply(s, e1);
+        T v = f * scalar_multiply(dir, q);
+
+        if (v < 0.0 || u + v > 1.0) {
+            return false;
+        }
+
+        T t = f * scalar_multiply(e2, q);
+        
+        if (t >= 0 && t <= 1) {
+            // inter = orig + dir * t;
+            return true;
+        }
+        return false;
+    }
+
+
+    bool intersection (const triangle<T>& rhs) const {
+        size_t num_of_valid = valid();
+        num_of_valid += rhs.valid();
+        switch(num_of_valid) {
+            case 0:
+                {
+                    // two points
+                    if(isPoint() && rhs.isPoint()) {
+                        return (a == rhs.get_a());
+                    }
+
+                    //two lines
+                    if (!isPoint() && !rhs.isPoint()) {
+                        line<T> first(get_line_vec_from_trg(), a);
+                        line<T> second(rhs.get_line_vec_from_trg(), rhs.get_a());
+
+                        point<T> inter = first.intersection(second);
+
+                        if((is_point_on_segment(inter, a, b) || is_point_on_segment(inter, a, c) ||
+                        is_point_on_segment(inter, b, c)) && (is_point_on_segment(inter, a, b)||
+                        is_point_on_segment(inter, rhs.get_a(), rhs.get_c()) || is_point_on_segment(inter, rhs.get_b(), rhs.get_c()))) {
+                            return true;
+                        }
+
+                        if (first == second){
+                            if(is_point_on_segment(a, rhs.get_a(), rhs.get_b()) || is_point_on_segment(a, rhs.get_b(), rhs.get_c()) ||
+                            is_point_on_segment(a, rhs.get_a(), rhs.get_c())) {
+                            return true;
+                            }
+
+                            if(is_point_on_segment(b, rhs.get_a(), rhs.get_b()) || is_point_on_segment(b, rhs.get_b(), rhs.get_c()) ||
+                            is_point_on_segment(b, rhs.get_a(), rhs.get_c())) {
+                            return true;
+                            }
+
+                            if(is_point_on_segment(c, rhs.get_a(), rhs.get_b()) || is_point_on_segment(c, rhs.get_b(), rhs.get_c()) ||
+                            is_point_on_segment(c, rhs.get_a(), rhs.get_c())) {
+                            return true;
+                            }
+
+                            if(is_point_on_segment(rhs.get_a(), a, b) || is_point_on_segment(rhs.get_a(), b, c) ||
+                            is_point_on_segment(rhs.get_a(), a, c)) {
+                            return true;
+                            }
+
+                            if(is_point_on_segment(rhs.get_b(), a, b) || is_point_on_segment(rhs.get_b(), b, c) ||
+                            is_point_on_segment(rhs.get_b(), a, c)) {
+                            return true;
+                            }
+
+                            if(is_point_on_segment(rhs.get_c(), a, b) || is_point_on_segment(rhs.get_c(), b, c) ||
+                            is_point_on_segment(rhs.get_c(), a, c)) {
+                            return true;
+                            }
+                        }
+                    }
+
+                    //one point, one line
+                    if (isPoint()) {
+                        if(is_point_on_segment(a, rhs.get_a(), rhs.get_c()))
+                            return true;
+                        return false;
+                    } else {
+                        if(is_point_on_segment(rhs.get_a(), a, c))
+                            return true;
+                        return false;
+                    }
+                    break;
+                }
+            case 1:
+                {
+                    // one point
+                    if (isPoint() || rhs.isPoint()) {
+                        if (isPoint()) {
+                            return rhs.point_in_triangle(get_a());
+                        } else {
+                            return point_in_triangle(rhs.get_a());
+                        }
+                    } else {
+                        // one line
+                        if (valid()) {
+                            line<T> l(rhs.get_c() - rhs.get_a(), rhs.get_a());
+                            return triangle_intersection(l);
+                        } else {
+                            line<T> l(c - a, a);
+
+                            return rhs.triangle_intersection(l);
+                        }
+                    }
+                    break;
+                }
+            case 2:
+                {
+                    plane<T> lplane(a, b, c);
+                    plane<T> rplane(rhs.get_a(), rhs.get_b(), rhs.get_c());
+                    // std::cout << lplane.substitute(rhs.get_a()) << " " << lplane.substitute(rhs.get_b()) << " " << rplane.substitute(rhs.get_c()) << std::endl;
+
+                    if (lplane.substitute(rhs.get_a()) > 0 && lplane.substitute(rhs.get_b()) > 0 && lplane.substitute(rhs.get_c()) > 0) {
+                        return false;
+                    }
+
+                    if (lplane.substitute(rhs.get_a()) < 0 && lplane.substitute(rhs.get_b()) < 0 && lplane.substitute(rhs.get_c()) < 0) {
+                        return false;
+                    }
+
+                    if (rplane.substitute(a) > 0 && rplane.substitute(b) > 0 && rplane.substitute(c) > 0) {
+                        return false;
+                    }
+
+                    if (rplane.substitute(a) < 0 && rplane.substitute(b) < 0 && rplane.substitute(c) < 0) {
+                        return false;
+                    }
+
+                    line<T> lfirst(b - a, a);
+                    line<T> lsecond(c - a, a);
+                    line<T> lthird(c - b, b);
+
+                    line<T> rfirst(rhs.get_b() - rhs.get_a(), rhs.get_a());
+                    line<T> rsecond(rhs.get_c() - rhs.get_a(), rhs.get_a());
+                    line<T> rthird(rhs.get_c() - rhs.get_b(), rhs.get_b());
+
+                    return rhs.triangle_intersection(lfirst) || rhs.triangle_intersection(lsecond) || rhs.triangle_intersection(lthird) ||
+                           triangle_intersection(rfirst)     || triangle_intersection(rsecond)     || triangle_intersection(rthird);
+                    return false;
+                    break;
+                }
+            default:
+                std::cout << "Unexpected error!" << std::endl;
+        }
+
+        return 0;
+    }
     
 };
 
@@ -133,223 +384,6 @@ bool operator!=(const triangle<T>& lhs, const triangle<T>& rhs) {
 }
 
 template <typename T = float>
-bool triangle_intersection(const line<T>& l, const triangle<T>& trg) {
-    point<T> orig = l.get_point();
-    point<T> dir = l.get_vec();
-
-    point<T> v0 = trg.get_a();
-    point<T> v1 = trg.get_b();
-    point<T> v2 = trg.get_c();
-
-    point<T> e1 = v1 - v0;
-    point<T> e2 = v2 - v0;
-    point<T> h = vec_multiply(dir, e2);
-    T a = scalar_multiply(e1,h);
-    if (cmp(a, 0)) {
-        //случай когда линия и треугольник в одной плоскости
-        line<T> f(e1, v0);
-        line<T> s(e2, v0);
-        line<T> t(e2 - e1, v1);
-
-        point<T> p1 = intersection(l, f);
-        point<T> p2 = intersection(l, s);
-        point<T> p3 = intersection(l, t);
-
-        if (point_in_triangle(orig, trg) || point_in_triangle(orig + dir, trg))
-            return true;
-
-        if (p1.valid() && point_in_triangle(p1, trg) && is_point_on_segment(p1, orig, orig + dir))
-            return true;
-
-        if (p2.valid() && point_in_triangle(p2, trg) && is_point_on_segment(p2, orig, orig + dir))
-            return true;
-
-        if (p3.valid() && point_in_triangle(p3, trg) && is_point_on_segment(p3, orig, orig + dir))
-            return true;
-
-        return false;
-    }
-
-    T f = 1.0 / a;
-    point<T> s = orig - v0;
-    T u = f * scalar_multiply(s, h);
-
-    if (u < 0.0 || u > 1.0) {
-        return false;
-    }
-
-    point<T> q = vec_multiply(s, e1);
-    T v = f * scalar_multiply(dir, q);
-
-    if (v < 0.0 || u + v > 1.0) {
-        return false;
-    }
-
-    T t = f * scalar_multiply(e2, q);
-    
-    if (t >= 0 && t <= 1) {
-        // inter = orig + dir * t;
-        return true;
-    }
-    return false;
-}
-
-template<typename T = float>
-point<T> get_line_vec_from_trg(const triangle<T>& trg) {
-    point<T> zero(0,0,0);
-    if (trg.valid()) {
-        return point<T>(NAN, NAN, NAN);
-    }
-
-    if (trg.get_a() - trg.get_b() != zero) {
-        return trg.get_a() - trg.get_b();
-    }
-
-    if (trg.get_c() - trg.get_b() != zero) {
-        return trg.get_c() - trg.get_b();
-    }
-
-    if (trg.get_a() - trg.get_c() != zero) {
-        return trg.get_a() - trg.get_c();
-    }
-
-    return point<T>(NAN, NAN, NAN);
-}
-
-template<typename T = float>
-bool intersection (const triangle<T>& lhs, const triangle<T>& rhs) {
-    size_t num_of_valid = lhs.valid();
-    num_of_valid += rhs.valid();
-    switch(num_of_valid) {
-        case 0:
-            {
-                // two points
-                if(lhs.isPoint() && rhs.isPoint()) {
-                    return (lhs.get_a() == rhs.get_a());
-                }
-
-                //two lines
-                if (!lhs.isPoint() && !rhs.isPoint()) {
-                    line<T> first(get_line_vec_from_trg(lhs), lhs.get_a());
-                    line<T> second(get_line_vec_from_trg(rhs), rhs.get_a());
-
-                    point<T> inter = intersection(first, second);
-
-                    if((is_point_on_segment(inter, lhs.get_a(), lhs.get_b()) || is_point_on_segment(inter, lhs.get_a(), lhs.get_c()) ||
-                       is_point_on_segment(inter, lhs.get_b(), lhs.get_c())) && (is_point_on_segment(inter, lhs.get_a(), lhs.get_b())||
-                       is_point_on_segment(inter, rhs.get_a(), rhs.get_c()) || is_point_on_segment(inter, rhs.get_b(), rhs.get_c()))) {
-                        return true;
-                    }
-
-                    if (first == second){
-                        if(is_point_on_segment(lhs.get_a(), rhs.get_a(), rhs.get_b()) || is_point_on_segment(lhs.get_a(), rhs.get_b(), rhs.get_c()) ||
-                           is_point_on_segment(lhs.get_a(), rhs.get_a(), rhs.get_c())) {
-                        return true;
-                        }
-
-                        if(is_point_on_segment(lhs.get_b(), rhs.get_a(), rhs.get_b()) || is_point_on_segment(lhs.get_b(), rhs.get_b(), rhs.get_c()) ||
-                           is_point_on_segment(lhs.get_b(), rhs.get_a(), rhs.get_c())) {
-                        return true;
-                        }
-
-                        if(is_point_on_segment(lhs.get_c(), rhs.get_a(), rhs.get_b()) || is_point_on_segment(lhs.get_c(), rhs.get_b(), rhs.get_c()) ||
-                           is_point_on_segment(lhs.get_c(), rhs.get_a(), rhs.get_c())) {
-                        return true;
-                        }
-
-                        if(is_point_on_segment(rhs.get_a(), lhs.get_a(), lhs.get_b()) || is_point_on_segment(rhs.get_a(), lhs.get_b(), lhs.get_c()) ||
-                           is_point_on_segment(rhs.get_a(), lhs.get_a(), lhs.get_c())) {
-                        return true;
-                        }
-
-                        if(is_point_on_segment(rhs.get_b(), lhs.get_a(), lhs.get_b()) || is_point_on_segment(rhs.get_b(), lhs.get_b(), lhs.get_c()) ||
-                           is_point_on_segment(rhs.get_b(), lhs.get_a(), lhs.get_c())) {
-                        return true;
-                        }
-
-                        if(is_point_on_segment(rhs.get_c(), lhs.get_a(), lhs.get_b()) || is_point_on_segment(rhs.get_c(), lhs.get_b(), lhs.get_c()) ||
-                           is_point_on_segment(rhs.get_c(), lhs.get_a(), lhs.get_c())) {
-                        return true;
-                        }
-                    }
-                }
-
-                //one point, one line
-                if (lhs.isPoint()) {
-                    if(is_point_on_segment(lhs.get_a(), rhs.get_a(), rhs.get_c()))
-                        return true;
-                    return false;
-                } else {
-                    if(is_point_on_segment(rhs.get_a(), lhs.get_a(), lhs.get_c()))
-                        return true;
-                    return false;
-                }
-                break;
-            }
-        case 1:
-            {
-                // one point
-                if (lhs.isPoint() || rhs.isPoint()) {
-                    if (lhs.isPoint()) {
-                        return point_in_triangle(lhs.get_a(), rhs);
-                    } else {
-                        return point_in_triangle(rhs.get_a(), lhs);
-                    }
-                } else {
-                    // one line
-                    if (lhs.valid()) {
-                        line<T> l(rhs.get_c() - rhs.get_a(), rhs.get_a());
-                        return triangle_intersection(l, lhs);
-                    } else {
-                        line<T> l(lhs.get_c() - lhs.get_a(), lhs.get_a());
-
-                        return triangle_intersection(l, rhs);
-                    }
-                }
-                break;
-            }
-        case 2:
-            {
-                plane<T> lplane(lhs.get_a(), lhs.get_b(), lhs.get_c());
-                plane<T> rplane(rhs.get_a(), rhs.get_b(), rhs.get_c());
-
-                if (lplane.substitute(rhs.get_a()) > 0 && lplane.substitute(rhs.get_b()) > 0 && rplane.substitute(rhs.get_c()) > 0) {
-                    return false;
-                }
-
-                if (lplane.substitute(rhs.get_a()) < 0 && lplane.substitute(rhs.get_b()) < 0 && lplane.substitute(rhs.get_c()) < 0) {
-                    return false;
-                }
-
-                if (rplane.substitute(lhs.get_a()) > 0 && rplane.substitute(lhs.get_b()) > 0 && rplane.substitute(lhs.get_c()) > 0) {
-                    return false;
-                }
-
-                if (rplane.substitute(lhs.get_a()) < 0 && rplane.substitute(lhs.get_b()) < 0 && rplane.substitute(lhs.get_c()) < 0) {
-                    return false;
-                }
-
-                line<T> lfirst(lhs.get_b() - lhs.get_a(), lhs.get_a());
-                line<T> lsecond(lhs.get_c() - lhs.get_a(), lhs.get_a());
-                line<T> lthird(lhs.get_c() - lhs.get_b(), lhs.get_b());
-
-                line<T> rfirst(rhs.get_b() - rhs.get_a(), rhs.get_a());
-                line<T> rsecond(rhs.get_c() - rhs.get_a(), rhs.get_a());
-                line<T> rthird(rhs.get_c() - rhs.get_b(), rhs.get_b());
-
-                return triangle_intersection(lfirst, rhs) || triangle_intersection(lsecond, rhs) || triangle_intersection(lthird, rhs) ||
-                       triangle_intersection(rfirst, lhs) || triangle_intersection(rsecond, lhs) || triangle_intersection(rthird, lhs);
-                return false;
-                break;
-            }
-        default:
-            std::cout << "Unexpected error!" << std::endl;
-    }
-
-    return 0;
-}
-
-template <typename T = float>
 bool is_point_on_segment(const point<T>& p, const point<T>& a, const point<T>& b) {
     if (!p.valid()) {
         return false;
@@ -357,44 +391,5 @@ bool is_point_on_segment(const point<T>& p, const point<T>& a, const point<T>& b
     if (cmp(sqrt((p - a).length()) + sqrt((p - b).length()), sqrt((a - b).length()))) {
         return true;
     }
-    return false;
-}
-
-template<typename T = float>
-bool point_in_triangle(const point<T>& p, const triangle<T>& trg) {
-    point<T> v0 = trg.get_a() - trg.get_b();
-    point<T> v1 = trg.get_c() - trg.get_a();
-    point<T> v2 = trg.get_b() - trg.get_c();
-
-    point<T> p_a = vec_multiply(v0, p - trg.get_b()).normalize();
-    point<T> p_b = vec_multiply(v1, p - trg.get_a()).normalize();
-    point<T> p_c = vec_multiply(v2, p - trg.get_c()).normalize();
-
-    point<T> zero(0,0,0);
-
-    if ((p_a == zero && p_b == zero) || (p_a == zero && p_c == zero) || (p_b == zero && p_c == zero)) {
-        return true;
-    }
-
-    if (p_a == zero) {
-        if (p_b == p_c)
-            return true;
-        return false;
-    }
-
-    if (p_b == zero) {
-        if (p_a == p_c)
-            return true;
-        return false;
-    }
-
-    if (p_c == zero) {
-        if (p_a == p_b)
-            return true;
-        return false; 
-    }
-
-    if (p_a == p_b && p_b == p_c)
-        return true;
     return false;
 }

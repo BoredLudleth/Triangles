@@ -13,7 +13,6 @@ private:
     T z = NAN;
 public:
     point(T x, T y, T z) : x(x), y(y), z(z) {};
-    point(const point& other) : x(other.get_x()), y(other.get_y()), z(other.get_z()) {}
 
     void print() const {
         std::cout << x << " " << y << " " << z << std::endl;
@@ -49,11 +48,6 @@ public:
 
     float length() const {
         return x*x + y*y + z*z;
-    }
-
-    point& operator=(point other) {   //copy and swap
-        swap(other);
-        return *this;
     }
 
     point swap(point& other) {
