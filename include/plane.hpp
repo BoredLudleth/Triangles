@@ -4,94 +4,87 @@
 
 template <typename T = float>
 class plane {
-private:
-    using point_t = point<T>;
+ private:
+  using point_t = point<T>;
 
-    T a = NAN;
-    T b = NAN;
-    T c = NAN;
-    T d = NAN;
-public:
-    plane (const point<T>& aa, const point<T>& bb, const point<T>& cc) {
-        point_t vec1 = aa - bb;
-        point_t vec2 = cc - bb;
+  T a = NAN;
+  T b = NAN;
+  T c = NAN;
+  T d = NAN;
 
-        a = vec1.get_y() * vec2.get_z() - vec1.get_z() * vec2.get_y();
-        b = vec1.get_z() * vec2.get_x() - vec1.get_x() * vec2.get_z();
-        c = vec1.get_x() * vec2.get_y() - vec1.get_y() * vec2.get_x();
-        d = -(a * aa.get_x() + b * aa.get_y() + c * aa.get_z());
-    }
+ public:
+  plane(const point<T>& aa, const point<T>& bb, const point<T>& cc) {
+    point_t vec1 = aa - bb;
+    point_t vec2 = cc - bb;
 
-    plane (T a, T b, T c, T d) : a(a), b(b), c(c), d(d) {};
+    a = vec1.y * vec2.z - vec1.z * vec2.y;
+    b = vec1.z * vec2.x - vec1.x * vec2.z;
+    c = vec1.x * vec2.y - vec1.y * vec2.x;
+    d = -(a * aa.x + b * aa.y + c * aa.z);
+  }
 
-    T get_a() const {
-        return a;
-    }
-    T get_b() const {
-        return b;
-    }
-    T get_c() const {
-        return c;
-    }
-    T get_d() const {
-        return d;
-    }
+  plane(T a, T b, T c, T d) : a(a), b(b), c(c), d(d){};
 
-    T substitute(point_t point) const {
-        return a * point.get_x() + b * point.get_y() + c * point.get_z() + d;
-    }
+  T get_a() const { return a; }
+  T get_b() const { return b; }
+  T get_c() const { return c; }
+  T get_d() const { return d; }
 
-    void print() const {
-        std::cout << a << " " << b << " " << c << " " << d << std::endl;
-    }
+  T substitute(point_t point) const {
+    return a * point.x + b * point.y + c * point.z + d;
+  }
+
+  void print() const {
+    std::cout << a << " " << b << " " << c << " " << d << std::endl;
+  }
 };
 
-template<typename T = float>
+template <typename T = float>
 bool operator==(const plane<T>& lhs, const plane<T>& rhs) {
-    float k = 0;
-    if (cmp(rhs.get_a(), 0)) {
-        if (!cmp(lhs.get_a(), 0)) {
-            return false;
-        }
-    } else {
-        k = lhs.get_a() / rhs.get_a();
+  float k = 0;
+  if (cmp(rhs.get_a(), 0)) {
+    if (!cmp(lhs.get_a(), 0)) {
+      return false;
     }
+  } else {
+    k = lhs.get_a() / rhs.get_a();
+  }
 
-    if (cmp(rhs.get_b(), 0)) {
-        if (!cmp(lhs.get_b(), 0)) {
-            return false;
-        }
-    } else {
-        if (k == 0) {
-            k = lhs.get_b() / rhs.get_b();
-        } else if (!cmp(k, lhs.get_b() / rhs.get_b())) {
-            return false;
-        }
+  if (cmp(rhs.get_b(), 0)) {
+    if (!cmp(lhs.get_b(), 0)) {
+      return false;
     }
-
-    if (cmp(rhs.get_c(), 0)) {
-        if (!cmp(lhs.get_c(), 0)) {
-            return false;
-        }
-    } else {
-        if (k == 0) {
-            k = lhs.get_c() / rhs.get_c();
-        } else if (!cmp(k, lhs.get_c() / rhs.get_c())) {
-            return false;
-        }
+  } else {
+    if (k == 0) {
+      k = lhs.get_b() / rhs.get_b();
+    } else if (!cmp(k, lhs.get_b() / rhs.get_b())) {
+      return false;
     }
+  }
 
-    if (cmp(rhs.get_d(), 0)) {
-        if (!cmp(lhs.get_d(), 0)) {
-            return false;
-        }
-    } else {
-        if (k == 0) {
-            k = lhs.get_d() / rhs.get_d();
-        } else if (!cmp(k, lhs.get_d() / rhs.get_d())) {
-            return false;
-        }
+  if (cmp(rhs.get_c(), 0)) {
+    if (!cmp(lhs.get_c(), 0)) {
+      return false;
     }
+  } else {
+    if (k == 0) {
+      k = lhs.get_c() / rhs.get_c();
+    } else if (!cmp(k, lhs.get_c() / rhs.get_c())) {
+      return false;
+    }
+  }
 
-    return true;
+  if (cmp(rhs.get_d(), 0)) {
+    if (!cmp(lhs.get_d(), 0)) {
+      return false;
+    }
+  } else {
+    if (k == 0) {
+      k = lhs.get_d() / rhs.get_d();
+    } else if (!cmp(k, lhs.get_d() / rhs.get_d())) {
+      return false;
+    }
+  }
+
+  return true;
 }

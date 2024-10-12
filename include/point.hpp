@@ -1,122 +1,84 @@
 #pragma once
 
-#include <iostream>
 #include <math.h>
+
+#include <iostream>
 
 #include "tools.hpp"
 
 template <typename T = float>
 class point {
-private:
-    T x = NAN;
-    T y = NAN;
-    T z = NAN;
-public:
-    point(T x, T y, T z) : x(x), y(y), z(z) {};
+ public:
+  T x = NAN;
+  T y = NAN;
+  T z = NAN;
+  point(T x, T y, T z) : x(x), y(y), z(z){};
 
-    void print() const {
-        std::cout << x << " " << y << " " << z << std::endl;
+  void print() const { std::cout << x << " " << y << " " << z << std::endl; }
+
+  bool valid() const { return !isnan(x) && !isnan(y) && !isnan(z); }
+
+  float length() const { return x * x + y * y + z * z; }
+
+  point swap(point& other) {
+    std::swap(x, other.x);
+    std::swap(y, other.y);
+    std::swap(z, other.z);
+
+    return *this;
+  }
+
+  point<T> normalize() {
+    if (cmp(length(), 0)) {
+      return *this;
     }
 
-    bool valid() const {
-        return !isnan(x) && !isnan(y) && !isnan (z);
-    }
-
-    T get_x() const {
-        return x;
-    }
-
-    T get_y() const {
-        return y;
-    }
-
-    T get_z() const {
-        return z;
-    }
-
-    T& x_() {
-        return x;
-    }
-
-    T& y_() {
-        return y;
-    }
-
-    T& z_() {
-        return z;
-    }
-
-    float length() const {
-        return x*x + y*y + z*z;
-    }
-
-    point swap(point& other) {
-        std::swap(x, other.x_());
-        std::swap(y, other.y_());
-        std::swap(z, other.z_());
-        
-        return *this;
-    }
-
-    point<T> normalize() {
-        if (cmp(length(), 0)) {
-            return *this;
-        }
-
-        return (*this) * (1 / sqrt(length()));
-    }
+    return (*this) * (1 / sqrt(length()));
+  }
 };
 
-template<typename T = float>
+template <typename T = float>
 point<T> vec_multiply(const point<T>& lhs, const point<T>& rhs) {
-    point<T> result(lhs.get_y() * rhs.get_z() - lhs.get_z() * rhs.get_y(),
-                    lhs.get_z() * rhs.get_x() - lhs.get_x() * rhs.get_z(),
-                    lhs.get_x() * rhs.get_y() - lhs.get_y() * rhs.get_x());
+  point<T> result(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z,
+                  lhs.x * rhs.y - lhs.y * rhs.x);
 
-    return result;
+  return result;
 }
 
-template<typename T = float>
+template <typename T = float>
 T scalar_multiply(const point<T>& lhs, const point<T>& rhs) {
-    return lhs.get_x() * rhs.get_x() + lhs.get_y() * rhs.get_y() + lhs.get_z() * rhs.get_z();
+  return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 }
-template<typename T = float>
+template <typename T = float>
 bool operator==(const point<T>& lhs, const point<T>& rhs) {
-    if (cmp(lhs.get_x(), rhs.get_x()) && cmp(lhs.get_y(), rhs.get_y()) && cmp(lhs.get_z(), rhs.get_z()))
-        return true;
-    return false;
+  if (cmp(lhs.x, rhs.x) && cmp(lhs.y, rhs.y) && cmp(lhs.z, rhs.z)) return true;
+  return false;
 }
 
-template<typename T = float>
+template <typename T = float>
 bool operator!=(const point<T>& lhs, const point<T>& rhs) {
-    return !operator==(lhs, rhs);
+  return !operator==(lhs, rhs);
 }
 
-template<typename T = float>
+template <typename T = float>
 point<T> operator+(const point<T>& lhs, const point<T>& rhs) {
-    point<T> result(lhs.get_x() + rhs.get_x(),
-                    lhs.get_y() + rhs.get_y(),
-                    lhs.get_z() + rhs.get_z());
-    return result;
+  point<T> result(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+  return result;
 }
 
-template<typename T = float>
+template <typename T = float>
 point<T> operator-(const point<T>& lhs, const point<T>& rhs) {
-    point<T> result(lhs.get_x() - rhs.get_x(),
-                    lhs.get_y() - rhs.get_y(),
-                    lhs.get_z() - rhs.get_z());
-    return result;
+  point<T> result(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
+  return result;
 }
 
-template<typename T = float>
+template <typename T = float>
 point<T> operator*(const point<T>& lhs, const T& rhs) {
-    point<T> result(lhs.get_x() * rhs,
-                    lhs.get_y() * rhs,
-                    lhs.get_z() * rhs);
-    return result;
+  point<T> result(lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
+  return result;
 }
 
-template<typename T = float>
+template <typename T = float>
 point<T> operator*(const T& lhs, const point<T>& rhs) {
-    return rhs * lhs;
+  return rhs * lhs;
 }
