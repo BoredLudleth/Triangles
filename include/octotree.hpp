@@ -116,7 +116,9 @@ class octotree {
 
   const std::deque<cell<T>>& get_groups() { return groups; }
 
-  void divide_cell_x() {
+  void divide_cell() {
+    static int axis = 0;
+
     std::list<ListIt> plus;
     std::list<ListIt> minus;
 
@@ -124,16 +126,29 @@ class octotree {
 
     for (int i = 0; i < copy_num_of_cells; ++i) {
       auto front_groups = groups.front();
-      float x_average = front_groups.get_x_average();
+
+      T average = NAN;
+      size_t nod = axis % 3;
+      if (nod == 0) {
+        average = front_groups.get_x_average();
+      } else if (nod == 1){
+        average = front_groups.get_y_average();
+      } else {
+        average = front_groups.get_z_average();
+      }
 
       for (const auto& it : front_groups.get_incell()) {
-        if (it->get_a().x >= x_average || it->get_b().x >= x_average ||
-            it->get_c().x >= x_average) {
+        T coordinates[3][3] = {it->get_a().x, it->get_b().x, it->get_c().x,
+                               it->get_a().y, it->get_b().y, it->get_c().y,
+                               it->get_a().z, it->get_b().z, it->get_c().z};
+
+        if (coordinates[nod][0] >= average || coordinates[nod][1]  >= average ||
+            coordinates[nod][2] >= average) {
           plus.push_back(it);
         }
 
-        if (it->get_a().x <= x_average || it->get_b().x <= x_average ||
-            it->get_c().x <= x_average) {
+        if (coordinates[nod][0] <= average || coordinates[nod][1]  <= average ||
+            coordinates[nod][2] <= average) {
           minus.push_back(it);
         }
       }
@@ -155,99 +170,13 @@ class octotree {
 
       plus.clear();
       minus.clear();
-    }
-  }
-
-  void divide_cell_y() {
-    std::list<ListIt> plus;
-    std::list<ListIt> minus;
-
-    size_t copy_num_of_cells = num_of_cells;
-
-    for (int i = 0; i < copy_num_of_cells; ++i) {
-      auto front_groups = groups.front();
-      float y_average = front_groups.get_y_average();
-
-      for (const auto& it : front_groups.get_incell()) {
-        if (it->get_a().y >= y_average || it->get_b().y >= y_average ||
-            it->get_c().y >= y_average) {
-          plus.push_back(it);
-        }
-
-        if (it->get_a().y <= y_average || it->get_b().y <= y_average ||
-            it->get_c().y <= y_average) {
-          minus.push_back(it);
-        }
-      }
-
-      if (plus.size() + minus.size() < front_groups.get_incell().size() * 2) {
-        if (!plus.empty()) {
-          groups.push_back(cell<T>(plus));
-          num_of_cells++;
-        }
-
-        if (!minus.empty()) {
-          groups.push_back(cell<T>(minus));
-          num_of_cells++;
-        }
-
-        groups.pop_front();
-        num_of_cells--;
-      }
-
-      plus.clear();
-      minus.clear();
-    }
-  }
-
-  void divide_cell_z() {
-    std::list<ListIt> plus;
-    std::list<ListIt> minus;
-
-    size_t copy_num_of_cells = num_of_cells;
-
-    for (int i = 0; i < copy_num_of_cells; ++i) {
-      auto front_groups = groups.front();
-      float z_average = front_groups.get_z_average();
-
-      for (const auto& it : front_groups.get_incell()) {
-        if (it->get_a().z >= z_average || it->get_b().z >= z_average ||
-            it->get_c().z >= z_average) {
-          plus.push_back(it);
-        }
-
-        if (it->get_a().z <= z_average || it->get_b().z <= z_average ||
-            it->get_c().z <= z_average) {
-          minus.push_back(it);
-        }
-      }
-
-      if (plus.size() + minus.size() < front_groups.get_incell().size() * 2) {
-        if (!plus.empty()) {
-          cell<T> pl(plus);
-          groups.push_back(pl);
-          num_of_cells++;
-        }
-
-        if (!minus.empty()) {
-          cell<T> mn(minus);
-          groups.push_back(mn);
-          num_of_cells++;
-        }
-
-        groups.pop_front();
-        num_of_cells--;
-      }
-
-      plus.clear();
-      minus.clear();
+      ++axis;
     }
   }
 
   void divide_on_eight() {
-    divide_cell_x();
-    divide_cell_y();
-    divide_cell_z();
+    for (int i = 0; i < 3; ++i)
+      divide_cell();
   }
 
   void divide_full_depth() {
