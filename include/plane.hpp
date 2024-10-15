@@ -2,11 +2,10 @@
 
 #include "line.hpp"
 
+namespace geo_objects_space {
 template <typename T = float>
 class plane {
  private:
-  using point_t = point<T>;
-
   T a = NAN;
   T b = NAN;
   T c = NAN;
@@ -14,8 +13,8 @@ class plane {
 
  public:
   plane(const point<T>& aa, const point<T>& bb, const point<T>& cc) {
-    point_t vec1 = aa - bb;
-    point_t vec2 = cc - bb;
+    point<T> vec1 = aa - bb;
+    point<T> vec2 = cc - bb;
 
     a = vec1.y * vec2.z - vec1.z * vec2.y;
     b = vec1.z * vec2.x - vec1.x * vec2.z;
@@ -30,7 +29,7 @@ class plane {
   T get_c() const { return c; }
   T get_d() const { return d; }
 
-  T substitute(point_t point) const {
+  T substitute(point<T> point) const {
     return a * point.x + b * point.y + c * point.z + d;
   }
 
@@ -88,3 +87,4 @@ bool operator==(const plane<T>& lhs, const plane<T>& rhs) {
 
   return true;
 }
+}  // namespace geo_objects

@@ -12,11 +12,18 @@ cmake -S ./ -B build/
 cmake --build build
 cd build/
 ```
+При сборке проекта можно использовать флаги -DBUILD_TESTING и -DCMAKE_BUILD_TYPE.
+
 Для запуска проекта требуется:
 
 ```
-./trg < path_to_data_file
-./trg_test
+./build/trg < path_to_data_file
+```
+
+Для запуска тестов требуется:
+```
+cd build/
+ctest
 ```
 
 ## Ввод/вывод

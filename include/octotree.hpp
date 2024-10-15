@@ -6,6 +6,9 @@
 
 #include "triangle.hpp"
 
+namespace octotree_space {
+using triangle_space::triangle;
+
 template <typename T = float>
 class cell {
  private:
@@ -79,11 +82,6 @@ class cell {
 
       for (auto second = it; second != incell.end(); ++second) {
         if ((*first)->intersection(**second)) {
-          // std::cout << (*first)->num << " " << (*second)->num << " "<<
-          // intersection(**first, **second) << std::endl;
-          // (*first)->print();
-          // (*second)->print();
-
           result[(*first)->num] = (*first)->num;
           result[(*second)->num] = (*second)->num;
         }
@@ -274,3 +272,4 @@ size_t count_depth(size_t n) {
 
   return 3;
 }
+}  // namespace octotree

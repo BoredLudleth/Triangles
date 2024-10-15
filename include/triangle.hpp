@@ -7,13 +7,18 @@
 #include "plane.hpp"
 #include "point.hpp"
 
+namespace triangle_space {
+  using geo_objects_space::point;
+  using geo_objects_space::line;
+  using geo_objects_space::plane;
+  
 template <typename T = float>
 class triangle {
  private:
-  using point_t = point<T>;
-  point_t a;
-  point_t b;
-  point_t c;
+
+  point<T> a;
+  point<T> b;
+  point<T> c;
 
   bool isPoint() const {
     if (a == b && b == c) return true;
@@ -129,7 +134,6 @@ class triangle {
     T t = f * scalar_multiply(e2, q);
 
     if (t >= 0 && t <= 1) {
-      // inter = orig + dir * t;
       return true;
     }
     return false;
@@ -139,8 +143,8 @@ class triangle {
   size_t num = 0;
 
   triangle() = default;
-  
-  triangle(const point_t& aa, const point_t& bb, const point_t& cc)
+
+  triangle(const point<T>& aa, const point<T>& bb, const point<T>& cc)
       : a{aa}, b{bb}, c{cc} {
     if (a.length() >= b.length()) {
       a.swap(b);
@@ -158,7 +162,7 @@ class triangle {
   // NOTE: in triangle length(a) <= length(b) <= length(c)
   triangle(const T& x1, const T& y1, const T& z1, const T& x2, const T& y2,
            const T& z2, const T& x3, const T& y3, const T& z3)
-      : a(point_t(x1, y1, z1)), b(point_t(x2, y2, z2)), c(point_t(x3, y3, z3)) {
+      : a(point<T>(x1, y1, z1)), b(point<T>(x2, y2, z2)), c(point<T>(x3, y3, z3)) {
     if (a.length() <= b.length()) {
       a.swap(b);
     }
@@ -180,8 +184,8 @@ class triangle {
 
   bool valid() const {
     if (a.valid() && b.valid() && c.valid()) {
-      point_t vec1(a.x - b.x, a.y - b.y, a.z - b.z);
-      point_t vec2(c.x - b.x, c.y - b.y, c.z - b.z);
+      point<T> vec1(a.x - b.x, a.y - b.y, a.z - b.z);
+      point<T> vec2(c.x - b.x, c.y - b.y, c.z - b.z);
 
       if (cmp(fabs(scalar_multiply(vec1, vec2)),
               sqrt(vec1.length() * vec2.length()))) {
@@ -197,11 +201,11 @@ class triangle {
     return false;
   }
 
-  point_t get_a() const { return a; }
+  point<T> get_a() const { return a; }
 
-  point_t get_b() const { return b; }
+  point<T> get_b() const { return b; }
 
-  point_t get_c() const { return c; }
+  point<T> get_c() const { return c; }
 
   T min_x() const { return std::min(std::min(a.x, b.x), std::min(b.x, c.x)); }
 
@@ -314,9 +318,6 @@ class triangle {
       case 2: {
         plane<T> lplane(a, b, c);
         plane<T> rplane(rhs.get_a(), rhs.get_b(), rhs.get_c());
-        // std::cout << lplane.substitute(rhs.get_a()) << " " <<
-        // lplane.substitute(rhs.get_b()) << " " <<
-        // rplane.substitute(rhs.get_c()) << std::endl;
 
         if (lplane.substitute(rhs.get_a()) > 0 &&
             lplane.substitute(rhs.get_b()) > 0 &&
@@ -378,16 +379,4 @@ template <typename T = float>
 bool operator!=(const triangle<T>& lhs, const triangle<T>& rhs) {
   return !operator==(lhs, rhs);
 }
-
-template <typename T = float>
-bool is_point_on_segment(const point<T>& p, const point<T>& a,
-                         const point<T>& b) {
-  if (!p.valid()) {
-    return false;
-  }
-  if (cmp(sqrt((p - a).length()) + sqrt((p - b).length()),
-          sqrt((a - b).length()))) {
-    return true;
-  }
-  return false;
-}
+}  // namespace triangle

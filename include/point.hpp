@@ -6,6 +6,7 @@
 
 #include "tools.hpp"
 
+namespace geo_objects_space {
 template <typename T = float>
 class point {
  public:
@@ -82,3 +83,17 @@ template <typename T = float>
 point<T> operator*(const T& lhs, const point<T>& rhs) {
   return rhs * lhs;
 }
+
+template <typename T = float>
+bool is_point_on_segment(const point<T>& p, const point<T>& a,
+                         const point<T>& b) {
+  if (!p.valid()) {
+    return false;
+  }
+  if (cmp(sqrt((p - a).length()) + sqrt((p - b).length()),
+          sqrt((a - b).length()))) {
+    return true;
+  }
+  return false;
+}
+}  // namespace geo_objects

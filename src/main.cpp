@@ -5,7 +5,12 @@
 #include <chrono>
 #endif
 
+
 int main() {
+  using geo_objects_space::point;
+  using triangle_space::triangle;
+  using namespace octotree_space;
+
   size_t n = 0;
   std::cin >> n;
 

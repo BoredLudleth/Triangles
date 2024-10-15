@@ -2,20 +2,20 @@ cmake_minimum_required(VERSION 3.0)
 
 project(cache)
 
-set(CMAKE_CXX_STANDARD 17)
+set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
-include_directories(include/)
+set(CMAKE_CXX_STANDARD 17)
+option(BUILD_TESTING "Build tests" ON)
+
+
+include_directories(${INCLUDE_DIR})
 
 add_executable (trg src/main.cpp src/tools.cpp)
 
-enable_testing()
-find_package(GTest REQUIRED)
-
 add_executable(trg_gen src/trg_gen.cpp)
 
-add_executable(trg_test src/triangle_test.cpp src/tools.cpp)
-
-target_link_libraries(
-  trg_test
-  GTest::gtest_main
-)
+if(BUILD_TESTING)
+  include(CTest)
+  enable_testing()
+  add_subdirectory(test/)
+endif()

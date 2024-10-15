@@ -9,6 +9,12 @@
 
 #include "triangle.hpp"
 
+namespace tests {
+  using geo_objects_space::point;
+  using geo_objects_space::line;
+  using geo_objects_space::plane;
+  using triangle_space::triangle;
+
 TEST(TestPointConstr1, TrgTest) {
   point<float> p1(1, 2, 3);
 
@@ -191,3 +197,4 @@ TEST(TestTriangle, TrgTest) {
                         125.812, 137.839, 171.111);
   EXPECT_EQ(trg24.intersection(trg25), 1);
 }
+}  // namespace tests

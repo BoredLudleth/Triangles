@@ -3,6 +3,7 @@
 #include "point.hpp"
 #include "tools.hpp"
 
+namespace geo_objects_space {
 template <typename T = float>
 class line {
  private:
@@ -145,3 +146,4 @@ bool operator==(const line<T>& lhs, const line<T>& rhs) {
 
   return true;
 }
+}  // namespace geo_objects
