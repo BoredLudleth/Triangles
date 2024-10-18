@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
-project("testing")
-
 find_package(GTest REQUIRED)
 
 include_directories(${INCLUDE_DIR})

@@ -147,15 +147,15 @@ class triangle {
   triangle(const point<T>& aa, const point<T>& bb, const point<T>& cc)
       : a{aa}, b{bb}, c{cc} {
     if (a.length() >= b.length()) {
-      a.swap(b);
+      std::swap(a, b);
     }
 
     if (a.length() >= c.length()) {
-      a.swap(c);
+      std::swap(a, c);
     }
 
     if (b.length() >= c.length()) {
-      b.swap(c);
+      std::swap(b, c);
     }
   };
 
@@ -164,15 +164,15 @@ class triangle {
            const T& z2, const T& x3, const T& y3, const T& z3)
       : a(point<T>(x1, y1, z1)), b(point<T>(x2, y2, z2)), c(point<T>(x3, y3, z3)) {
     if (a.length() <= b.length()) {
-      a.swap(b);
+      std::swap(a, b);
     }
 
     if (a.length() <= c.length()) {
-      a.swap(c);
+      std::swap(a, c);
     }
 
     if (b.length() <= c.length()) {
-      b.swap(c);
+      std::swap(b, c);
     }
   };
 

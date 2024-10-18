@@ -21,14 +21,6 @@ class point {
 
   float length() const { return x * x + y * y + z * z; }
 
-  point swap(point& other) {
-    std::swap(x, other.x);
-    std::swap(y, other.y);
-    std::swap(z, other.z);
-
-    return *this;
-  }
-
   point<T> normalize() {
     if (cmp(length(), 0)) {
       return *this;
