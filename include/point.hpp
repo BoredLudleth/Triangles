@@ -7,6 +7,9 @@
 #include "tools.hpp"
 
 namespace geo_objects_space {
+
+using triangle_space::cmp;
+
 template <typename T = float>
 class point {
  public:
@@ -88,4 +91,4 @@ bool is_point_on_segment(const point<T>& p, const point<T>& a,
   }
   return false;
 }
-}  // namespace geo_objects
+}  // namespace geo_objects_space
