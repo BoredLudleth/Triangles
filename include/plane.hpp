@@ -2,7 +2,7 @@
 
 #include "line.hpp"
 
-namespace geo_objects_space {
+namespace triangle_space {
 template <typename T = float>
 class plane {
  private:

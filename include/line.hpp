@@ -3,7 +3,7 @@
 #include "point.hpp"
 #include "tools.hpp"
 
-namespace geo_objects_space {
+namespace triangle_space {
 template <typename T = float>
 class line {
  private:

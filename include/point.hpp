@@ -6,7 +6,7 @@
 
 #include "tools.hpp"
 
-namespace geo_objects_space {
+namespace triangle_space {
 
 using triangle_space::cmp;
 

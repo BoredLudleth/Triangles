@@ -8,9 +8,6 @@
 #include "point.hpp"
 
 namespace triangle_space {
-  using geo_objects_space::point;
-  using geo_objects_space::line;
-  using geo_objects_space::plane;
   
 template <typename T = float>
 class triangle {

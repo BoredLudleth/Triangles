@@ -9,11 +9,7 @@
 
 #include "triangle.hpp"
 
-namespace tests {
-  using geo_objects_space::point;
-  using geo_objects_space::line;
-  using geo_objects_space::plane;
-  using triangle_space::triangle;
+namespace triangle_space {
 
 TEST(TestPointConstr1, TrgTest) {
   point<float> p1(1, 2, 3);

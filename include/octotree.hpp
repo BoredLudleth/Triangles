@@ -6,8 +6,7 @@
 
 #include "triangle.hpp"
 
-namespace octotree_space {
-using triangle_space::triangle;
+namespace triangle_space {
 
 template <typename T = float>
 class cell {
