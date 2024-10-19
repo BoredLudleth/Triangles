@@ -361,19 +361,4 @@ class triangle {
     return 0;
   }
 };
-
-template <typename T = float>
-bool operator==(const triangle<T>& lhs, const triangle<T>& rhs) {
-  if (lhs.get_a() == rhs.get_a() && lhs.get_b() == rhs.get_b() &&
-      lhs.get_c() == rhs.get_c()) {
-    return true;
-  }
-
-  return false;
-}
-
-template <typename T = float>
-bool operator!=(const triangle<T>& lhs, const triangle<T>& rhs) {
-  return !operator==(lhs, rhs);
-}
 }  // namespace triangle
