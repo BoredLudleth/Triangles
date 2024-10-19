@@ -65,85 +65,26 @@ class line {
 
 template <typename T = float>
 bool operator==(const line<T>& lhs, const line<T>& rhs) {
-  point<T> vec1(lhs.get_vec());
+  point<T> vec1(lhs.get_vec().normalize());
   point<T> point1(lhs.get_point());
 
-  point<T> vec2(rhs.get_vec());
+  point<T> vec2(rhs.get_vec().normalize());
   point<T> point2(rhs.get_point());
 
-  point<T> vec3 = point1 - point2;
+  point<T> vec3 = (point1 - point2).normalize();
 
-  float k = 0;
-
-  if (cmp(vec2.x, 0)) {
-    if (!cmp(vec1.x, 0)) {
-      return false;
+  if (vec3.length() == 0) {
+    if (vec1 == vec2 || vec1 == (vec2 * -1.f)) {
+      return true;
     }
   } else {
-    k = vec1.x / vec2.x;
-  }
-
-  if (cmp(vec2.y, 0)) {
-    if (!cmp(vec1.y, 0)) {
-      return false;
-    }
-  } else {
-    if (k == 0) {
-      k = vec1.y / vec2.y;
-    } else if (!cmp(k, vec1.y / vec2.y)) {
-      return false;
+    if (vec1 == vec2 || vec1 == (vec2 * -1.f)) {
+      if (vec1 == vec3 || vec1 == (vec3 * -1.f)) {
+        return true;
+      }
     }
   }
 
-  if (cmp(vec2.z, 0)) {
-    if (!cmp(vec1.z, 0)) {
-      return false;
-    }
-  } else {
-    if (k == 0) {
-      k = vec1.z / vec2.z;
-    } else if (!cmp(k, vec1.z / vec2.z)) {
-      return false;
-    }
-  }
-
-  k = 0;
-  if (vec3 == point<T>(0, 0, 0)) {
-    return true;
-  }
-
-  if (cmp(vec3.x, 0)) {
-    if (!cmp(vec1.x, 0)) {
-      return false;
-    }
-  } else {
-    k = vec1.x / vec3.x;
-  }
-
-  if (cmp(vec3.y, 0)) {
-    if (!cmp(vec1.y, 0)) {
-      return false;
-    }
-  } else {
-    if (k == 0) {
-      k = vec1.y / vec3.y;
-    } else if (!cmp(k, vec1.y / vec3.y)) {
-      return false;
-    }
-  }
-
-  if (cmp(vec3.z, 0)) {
-    if (!cmp(vec1.z, 0)) {
-      return false;
-    }
-  } else {
-    if (k == 0) {
-      k = vec1.z / vec3.z;
-    } else if (!cmp(k, vec1.z / vec3.z)) {
-      return false;
-    }
-  }
-
-  return true;
+  return false;
 }
 }  // namespace geo_objects

@@ -94,11 +94,13 @@ TEST(TestLineEquality, TrgTest) {
   line<float> line2(point<float>(1, 0, 1), point<float>(1, 0, 1));
   line<float> line3(point<float>(4, 0, 4), point<float>(-1, -1, -1));
   line<float> line4(point<float>(1, 2, 3), point<float>(4, 5, 6));
+  line<float> line5(point<float>(2, 0, 2), point<float>(-1, 0, -1));
 
   EXPECT_EQ(line1 == line1, 1);
   EXPECT_EQ(line1 == line2, 1);
   EXPECT_EQ(line1 == line3, 0);
   EXPECT_EQ(line1 == line4, 0);
+  EXPECT_EQ(line1 == line5, 1);
 }
 
 TEST(TestLineInter, TrgTest) {
