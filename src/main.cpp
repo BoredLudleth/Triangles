@@ -5,9 +5,9 @@
 #include <chrono>
 #endif
 
-
 int main() {
   using namespace triangle_space;
+  using ListIt = typename std::list<triangle<float>>::iterator;
 
   size_t n = 0;
   std::cin >> n;
@@ -37,7 +37,7 @@ int main() {
 
     triangle<float> trg(point<float>(x1, y1, z1), point<float>(x2, y2, z2),
                         point<float>(x3, y3, z3));
-    trg.num = i;
+    int num = i;
     input.push_back(trg);
   }
 
@@ -49,7 +49,7 @@ int main() {
 
   int i = 0;
   for (auto it : groups) {
-    std::list<std::list<triangle<float>>::iterator> cur_group = it.get_incell();
+    std::list<std::pair<ListIt, int>> cur_group = it.get_incell();
     it.group_intersections(result);
   }
 

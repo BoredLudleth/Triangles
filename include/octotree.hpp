@@ -3,6 +3,7 @@
 #include <deque>
 #include <list>
 #include <map>
+#include <utility>
 
 #include "triangle.hpp"
 
@@ -13,7 +14,7 @@ class cell {
  private:
   using ListIt = typename std::list<triangle<T>>::iterator;
 
-  std::list<ListIt> incell;
+  std::list<std::pair<ListIt, int>> incell;
 
   T x_min = 0;
   T x_max = 0;
@@ -25,34 +26,34 @@ class cell {
   T z_max = 0;
 
  public:
-  cell(const std::list<ListIt>& incell) : incell(incell) {
-    x_min = x_max = (*incell.begin())->get_a().x;
-    y_min = y_max = (*incell.begin())->get_a().y;
-    z_min = z_max = (*incell.begin())->get_a().z;
+  cell(const std::list<std::pair<ListIt, int>>& incell) : incell(incell) {
+    x_min = x_max = incell.begin()->first->get_a().x;
+    y_min = y_max = incell.begin()->first->get_a().y;
+    z_min = z_max = incell.begin()->first->get_a().z;
 
     for (auto it = incell.begin(); it != incell.end(); ++it) {
-      if (x_min > (*it)->min_x()) {
-        x_min = (*it)->min_x();
+      if (x_min > it->first->min_x()) {
+        x_min = it->first->min_x();
       }
 
-      if (x_max < (*it)->max_x()) {
-        x_max = (*it)->max_x();
+      if (x_max < it->first->max_x()) {
+        x_max = it->first->max_x();
       }
 
-      if (y_min > (*it)->min_y()) {
-        y_min = (*it)->min_y();
+      if (y_min > it->first->min_y()) {
+        y_min = it->first->min_y();
       }
 
-      if (y_max < (*it)->max_y()) {
-        y_max = (*it)->max_y();
+      if (y_max < it->first->max_y()) {
+        y_max = it->first->max_y();
       }
 
-      if (z_min > (*it)->min_z()) {
-        z_min = (*it)->min_z();
+      if (z_min > it->first->min_z()) {
+        z_min = it->first->min_z();
       }
 
-      if (z_max < (*it)->max_z()) {
-        z_max = (*it)->max_z();
+      if (z_max < it->first->max_z()) {
+        z_max = it->first->max_z();
       }
     }
   }
@@ -63,26 +64,26 @@ class cell {
 
   T get_z_average() const { return (z_max + z_min) / 2; }
 
-  std::list<ListIt>& get_incell() { return incell; }
+  std::list<std::pair<ListIt, int>>& get_incell() { return incell; }
 
   void print() const {
     for (const auto& it : incell) {
-      std::cout << it->num << " ";
+      std::cout << it->second << " ";
     }
 
     std::cout << std::endl;
   }
 
   void group_intersections(std::map<size_t, size_t>& result) {
-    for (auto first = incell.begin(); first != incell.end(); ++first) {
-      auto it = first;
+    for (auto one = incell.begin(); one != incell.end(); ++one) {
+      auto it = one;
 
       it++;
 
-      for (auto second = it; second != incell.end(); ++second) {
-        if ((*first)->intersection(**second)) {
-          result[(*first)->num] = (*first)->num;
-          result[(*second)->num] = (*second)->num;
+      for (auto two = it; two != incell.end(); ++two) {
+        if (one->first->intersection(*two->first)) {
+          result[(*one).second] = (*one).second;
+          result[(*two).second] = (*two).second;
         }
       }
     }
@@ -103,10 +104,14 @@ class octotree {
  public:
   octotree(const std::list<triangle<T>>& myinput, size_t depth)
       : input(myinput), depth(depth) {
-    std::list<ListIt> prepare_for_deque;
+    std::list<std::pair<ListIt, int>> prepare_for_deque;
 
     for (auto it = input.begin(); it != input.end(); ++it) {
-      prepare_for_deque.push_back(it);
+      static int i = 0;
+
+      prepare_for_deque.push_back(std::pair<ListIt, int>(it, i));
+      
+      ++i;
     }
 
     groups.push_back(cell<T>(prepare_for_deque));
@@ -118,8 +123,8 @@ class octotree {
   void divide_cell() {
     static int axis = 0;
 
-    std::list<ListIt> plus;
-    std::list<ListIt> minus;
+    std::list<std::pair<ListIt, int>> plus;
+    std::list<std::pair<ListIt, int>> minus;
 
     size_t copy_num_of_cells = num_of_cells;
 
@@ -130,23 +135,24 @@ class octotree {
       size_t nod = axis % 3;
       if (nod == 0) {
         average = front_groups.get_x_average();
-      } else if (nod == 1){
+      } else if (nod == 1) {
         average = front_groups.get_y_average();
       } else {
         average = front_groups.get_z_average();
       }
 
       for (const auto& it : front_groups.get_incell()) {
-        T coordinates[3][3] = {it->get_a().x, it->get_b().x, it->get_c().x,
-                               it->get_a().y, it->get_b().y, it->get_c().y,
-                               it->get_a().z, it->get_b().z, it->get_c().z};
+        T coordinates[3][3] = {
+            it.first->get_a().x, it.first->get_b().x, it.first->get_c().x,
+            it.first->get_a().y, it.first->get_b().y, it.first->get_c().y,
+            it.first->get_a().z, it.first->get_b().z, it.first->get_c().z};
 
-        if (coordinates[nod][0] >= average || coordinates[nod][1]  >= average ||
+        if (coordinates[nod][0] >= average || coordinates[nod][1] >= average ||
             coordinates[nod][2] >= average) {
           plus.push_back(it);
         }
 
-        if (coordinates[nod][0] <= average || coordinates[nod][1]  <= average ||
+        if (coordinates[nod][0] <= average || coordinates[nod][1] <= average ||
             coordinates[nod][2] <= average) {
           minus.push_back(it);
         }
@@ -174,8 +180,7 @@ class octotree {
   }
 
   void divide_on_eight() {
-    for (int i = 0; i < 3; ++i)
-      divide_cell();
+    for (int i = 0; i < 3; ++i) divide_cell();
   }
 
   void divide_full_depth() {
@@ -200,4 +205,4 @@ size_t count_depth(size_t n) {
 
   return 3;
 }
-}  // namespace octotree
+}  // namespace triangle_space
